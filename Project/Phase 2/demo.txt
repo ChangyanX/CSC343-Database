@@ -1,0 +1,44 @@
+
+
+We changed our dateset in this project, so we re-answered some of the questions in phase 1 to make our project more complete
+New dataset URL: https://www.kaggle.com/airbnb/seattle?select=listings.csv
+
+Three investigative questions we plan to answer using this datas
+1. What is the busiest time of the year for airbnbs in seattle and how much does price change
+(i.e. the price range for apartments among off seasons and peak tourist seasons?)
+2. Who are the top rating superhosts(or hosts who have served at least ten guests) for each neighbourhood in Seattle?
+Which area has the strictest cancellation policy
+3. Among the full-score-reviewed listings, what is the percentage of house listings  which has the cost of more than 30 dollars for an extra people?
+
+
+Demo Info:
+
+csc343h-yangj295=> set search_path to projectschema;
+SET
+csc343h-yangj295=> \i schema.ddl.txt
+psql:schema.ddl.txt:1: NOTICE:  drop cascades to 11 other objects
+DETAIL:  drop cascades to type propertytype
+drop cascades to type roomtype
+drop cascades to type cancellationpolicy
+drop cascades to table hostinfo
+drop cascades to table hostresponses
+drop cascades to table listinginfo
+drop cascades to table neighborhoodinfo
+drop cascades to table listingprice
+drop cascades to table listingpolicy
+drop cascades to table score
+drop cascades to table review
+DROP SCHEMA
+CREATE SCHEMA
+SET
+CREATE DOMAIN
+CREATE DOMAIN
+CREATE DOMAIN
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE

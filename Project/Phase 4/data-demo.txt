@@ -1,0 +1,243 @@
+--(a)load the schema and data successfully
+--(b) run a SELECT * query on each of the tables
+--(c) show size of each table
+
+csc343h-yangj295=> \i data_loading.txt
+CREATE SCHEMA
+SET
+CREATE DOMAIN
+CREATE DOMAIN
+CREATE DOMAIN
+CREATE DOMAIN
+CREATE DOMAIN
+CREATE DOMAIN
+CREATE DOMAIN
+CREATE TABLE
+COPY 2749
+-- table HostInfo
+
+ host_id  |   host_name   | host_since 
+----------+---------------+------------
+ 51433714 | Chris         | 2015-12-15
+ 51461746 | Kristin       | 2015-12-15
+ 51946984 | Larry         | 2015-12-21
+ 51554113 | Sima          | 2015-12-17
+ 51860756 | Maggie & Alex | 2015-12-20
+ 53065829 | Gabriel       | 2016-01-02
+ 51081172 | Audra         | 2015-12-11
+ 51256001 | Maxwell       | 2015-12-13
+ 52580911 | Karen         | 2015-12-28
+ 53169216 | Judy          | 2016-01-03
+ 52791370 | Virginia      | 2015-12-30
+ 51875760 | Anand         | 2015-12-21
+ 53050379 | Ana           | 2016-01-02
+ 52603251 | Chloe         | 2015-12-29
+ 52463088 | Evan          | 2015-12-27
+ 53208610 | Julie         | 2016-01-03
+ 51344613 | Marissa       | 2015-12-14
+ 51372899 | Rachel        | 2015-12-14
+ 52012565 | Jeannine      | 2015-12-22
+ 52990042 | Richard       | 2016-01-01
+(20 rows)
+
+csc343h-yangj295=> select count(*) from HostInfo;
+ count 
+-------
+  2749
+(1 row)
+
+CREATE TABLE
+COPY 2247
+-- table HostResponses
+ host_id  | avg_host_response_rate | host_response_time 
+----------+------------------------+--------------------
+ 51875760 | within a few hours     | 100%
+ 51372899 | within an hour         | 83%
+ 51344613 | within an hour         | 100%
+ 51946984 | within a few hours     | 100%
+ 51554113 | within an hour         | 100%
+ 52012565 | within an hour         | 100%
+ 51433714 | within an hour         | 100%
+ 51256001 | within an hour         | 100%
+ 51081172 | within a few hours     | 80%
+(9 rows)
+
+csc343h-yangj295=> select count(*) from HostResponses;
+ count 
+-------
+  2247
+(1 row)
+
+CREATE TABLE
+COPY 3816
+--table ListingInfo
+
+ listing_id | host_id  | property_type |    room_type    
+------------+----------+---------------+-----------------
+   10310373 | 53050379 | Apartment     | Private room
+   10106055 | 51860756 | House         | Private room
+   10108451 | 51875760 | Condominium   | Entire home/apt
+   10231701 | 52580911 | Townhouse     | Private room
+   10036903 | 51433714 | Apartment     | Entire home/apt
+   10135378 | 52012565 | Apartment     | Entire home/apt
+   10122924 | 51946984 | Apartment     | Entire home/apt
+   10299195 | 52990042 | House         | Private room
+   10022421 | 51461746 | House         | Private room
+   10043487 | 51554113 | Townhouse     | Private room
+   10210625 | 52463088 | Apartment     | Entire home/apt
+    9994758 | 51344613 | Apartment     | Entire home/apt
+   10334184 | 53065829 | Apartment     | Entire home/apt
+   10339144 | 53208610 | Apartment     | Entire home/apt
+   10235136 | 52603251 | House         | Private room
+   10332096 | 53169216 | House         | Private room
+   10000273 | 51372899 | Apartment     | Entire home/apt
+    9975073 | 51256001 | Condominium   | Entire home/apt
+    9938792 | 51081172 | House         | Private room
+   10267360 | 52791370 | House         | Entire home/apt
+(20 rows)
+
+csc343h-yangj295=> select count(*) from ListingInfo;
+ count 
+-------
+  3816
+(1 row)
+
+CREATE TABLE
+COPY 999269
+--table ListingBooking
+ listing_id |   l_date   | available | daily_price 
+------------+------------+-----------+-------------
+     241032 | 2016-01-04 | t         | $85.00
+     241032 | 2016-01-05 | t         | $85.00
+     241032 | 2016-01-06 | f         | 
+     241032 | 2016-01-07 | f         | 
+     241032 | 2016-01-08 | f         | 
+     241032 | 2016-01-09 | f         | 
+     241032 | 2016-01-10 | f         | 
+     241032 | 2016-01-11 | f         | 
+     241032 | 2016-01-12 | f         | 
+     241032 | 2016-01-13 | t         | $85.00
+     241032 | 2016-01-14 | t         | $85.00
+     241032 | 2016-01-15 | f         | 
+     241032 | 2016-01-16 | f         | 
+     241032 | 2016-01-17 | f         | 
+     241032 | 2016-01-18 | t         | $85.00
+     241032 | 2016-01-19 | t         | $85.00
+     241032 | 2016-01-20 | t         | $85.00
+     241032 | 2016-01-21 | f         | 
+     241032 | 2016-01-22 | f         | 
+     241032 | 2016-01-23 | f         | 
+     241032 | 2016-01-24 | t         | $85.00
+
+csc343h-yangj295=> select count(*) from ListingBooking;
+ count 
+-------
+ 999269
+(1 row)
+
+CREATE TABLE
+COPY 3400
+-- NeighborhoodInfo
+ listing_id |       neighbourhood       
+------------+---------------------------
+   10310373 | Queen Anne
+   10262971 | Ballard
+   10249527 | Wallingford
+   10279830 | Minor
+   10273158 | Central Business District
+   10292753 | Belltown
+   10247453 | Central Business District
+   10339145 | Alki
+   10252110 | Genesee
+   10340165 | Greenwood
+   10281965 | Montlake
+   10250735 | Capitol Hill
+   10295151 | Capitol Hill
+   10334184 | Capitol Hill
+   10339144 | Capitol Hill
+   10235136 | Meadowbrook
+   10332096 | Olympic Hills
+   10319529 | North Beach/Blue Ridge
+   10248139 | Minor
+   10318171 | Stevens
+(20 rows)
+
+csc343h-yangj295=> select count(*) from NeighborhoodInfo;
+ count 
+-------
+  3400
+(1 row)
+
+CREATE TABLE
+COPY 3816
+-- table ListingPrice
+ listing_id |  price  
+------------+---------
+   10339145 | $219.00
+   10331249 | $45.00
+   10340165 | $43.00
+   10334184 | $120.00
+   10339144 | $60.00
+   10332096 | $40.00
+(6 rows)
+
+csc343h-yangj295=> select count(*) from ListingPrice;
+ count 
+-------
+  3816
+(1 row)
+
+CREATE TABLE
+COPY 3816
+--table ListingPolicy
+ listing_id | minimum_nights | instant_bookable | cancellation_policy 
+------------+----------------+------------------+---------------------
+   10339145 |              2 | t                | strict
+   10331249 |             14 | f                | flexible
+   10340165 |              1 | t                | flexible
+   10334184 |              2 | f                | flexible
+   10339144 |              1 | f                | flexible
+   10332096 |              1 | f                | flexible
+(6 rows)
+
+csc343h-yangj295=> select count(*) from ListingPolicy;
+ count 
+-------
+  3816
+(1 row)
+
+CREATE TABLE
+COPY 3171
+--table Score
+ listing_id | review_scores_rating | review_scores_accuracy 
+------------+----------------------+------------------------
+   10020221 |                  100 |                     10
+   10012724 |                  100 |                     10
+   10248139 |                  100 |                       
+   10118341 |                  100 |                     10
+(4 rows)
+
+csc343h-yangj295=> select count(*) from Score;
+ count 
+-------
+  3171
+(1 row)
+
+CREATE TABLE
+COPY 84849
+--table Review
+ review_id | listing_id | reviewer_name |    date    
+-----------+------------+---------------+------------
+  58441444 |   10118341 | Cameron       | 2016-01-02
+  58480800 |   10020221 | Gabe          | 2016-01-02
+  58466807 |   10248139 | Fernando      | 2016-01-02
+  57185597 |   10012724 | Lee           | 2015-12-22
+  57416670 |   10012724 | Brendan       | 2015-12-25
+(5 rows)
+
+csc343h-yangj295=> select count(*) from Review;
+ count 
+-------
+ 84849
+(1 row)
+

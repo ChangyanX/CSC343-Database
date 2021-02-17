@@ -1,0 +1,220 @@
+
+ --run each query and show its result.
+csc343h-yangj295=> -- Four investigative questions we plan to answer using this datas  
+csc343h-yangj295=> 
+csc343h-yangj295=> -- 1. What is the busiest time of the year for airbnbs in seattle and how much does price change  
+csc343h-yangj295=> -- (i.e. the average price for apartments among off seasons and peak tourist seasons?)  
+csc343h-yangj295=> DROP VIEW IF EXISTS occupiedListing CASCADE;
+DROP VIEW
+csc343h-yangj295=> DROP VIEW IF EXISTS allListing CASCADE;
+DROP VIEW
+csc343h-yangj295=> 
+csc343h-yangj295=> create view occupiedListing as
+csc343h-yangj295-> select extract(month from L_date) as month, count(*) as booked_count, avg(daily_price::money::numeric) as avgPrice
+csc343h-yangj295-> from listingBooking
+csc343h-yangj295-> where available = 't'
+csc343h-yangj295-> group by extract(month from L_date);
+CREATE VIEW
+csc343h-yangj295=> 
+csc343h-yangj295=> create view allListing as
+csc343h-yangj295-> select extract(month from L_date) as month, count(*) as all_count
+csc343h-yangj295-> from listingBooking
+csc343h-yangj295-> group by month;
+CREATE VIEW
+csc343h-yangj295=> 
+csc343h-yangj295=> 
+csc343h-yangj295=> select o.month, o.booked_count/a.all_count::float as occupancy_rate, o.avgprice
+csc343h-yangj295-> from occupiedListing o join allListing a using (month);
+ month |  occupancy_rate   |       avgprice       
+-------+-------------------+----------------------
+     1 | 0.567057878204972 | 124.7965304764153982
+     2 | 0.668534797612151 | 125.7856564248441121
+     3 |  0.71779495275572 | 130.7401723430447271
+     4 | 0.672790357925493 | 137.4980004704775347
+     5 | 0.680824241853013 | 142.6538667866475159
+     6 |  0.67845142439737 | 150.7168389319552110
+     7 | 0.626510992247697 | 155.4834608947477293
+     8 | 0.645679681425104 | 153.6413218013283702
+     9 | 0.673005978108677 | 145.8341956726246472
+    10 | 0.694296793051021 | 139.1497224532753909
+    11 |  0.71241018146389 | 137.3819919310722101
+    12 | 0.733508550685351 | 139.2375634680892088
+(12 rows)
+
+csc343h-yangj295=> -- 2. Who are the top rating (i.e hosts who has ever got a highest rating) superhosts (i.e. hosts who have a superhost badge) for each neighbourhood in Seattle?
+csc343h-yangj295=> 
+csc343h-yangj295=> DROP VIEW IF EXISTS a CASCADE;
+NOTICE:  drop cascades to view highest_rating_pernh
+DROP VIEW
+csc343h-yangj295=> DROP VIEW IF EXISTS highest_rating_perNH CASCADE; 
+NOTICE:  view "highest_rating_pernh" does not exist, skipping
+DROP VIEW
+csc343h-yangj295=> 
+csc343h-yangj295=> 
+csc343h-yangj295=> -- find all superhosts for each neighbourhood
+csc343h-yangj295=> CREATE VIEW a AS 
+csc343h-yangj295-> SELECT l.host_id, host_name, listing_id, neighbourhood, review_scores_rating
+csc343h-yangj295-> FROM HostInfo h 
+csc343h-yangj295-> JOIN ListingInfo l USING (host_id)
+csc343h-yangj295-> JOIN NeighborhoodInfo n USING (listing_id)
+csc343h-yangj295-> JOIN Score s USING (listing_id)
+csc343h-yangj295-> WHERE host_is_superhost=true
+csc343h-yangj295-> ORDER BY neighbourhood, l.host_id;
+CREATE VIEW
+csc343h-yangj295=> 
+csc343h-yangj295=> 
+csc343h-yangj295=> -- find the highest rating for each neighbourhood
+csc343h-yangj295=> CREATE VIEW highest_rating_perNH AS 
+csc343h-yangj295-> SELECT DISTINCT neighbourhood, max(review_scores_rating) AS max_rating
+csc343h-yangj295-> FROM a
+csc343h-yangj295-> GROUP BY neighbourhood
+csc343h-yangj295-> ORDER BY neighbourhood;
+CREATE VIEW
+csc343h-yangj295=> 
+csc343h-yangj295=> 
+csc343h-yangj295=> 
+csc343h-yangj295=> SELECT DISTINCT neighbourhood, host_id, host_name
+csc343h-yangj295-> FROM a 
+csc343h-yangj295-> JOIN highest_rating_perNH h USING (neighbourhood)
+csc343h-yangj295-> WHERE a.neighbourhood=h.neighbourhood
+csc343h-yangj295-> AND a.review_scores_rating=h.max_rating
+csc343h-yangj295-> ORDER BY neighbourhood;
+--the first few rows
+       neighbourhood       | host_id  |        host_name        
+---------------------------+----------+-------------------------
+ Alki                      | 38502645 | Ron
+ Arbor Heights             |  5407579 | Gina
+ Atlantic                  | 13200167 | Kumail
+ Atlantic                  | 32807985 | Ted
+ Ballard                   |    53050 | Bob
+ Ballard                   |  7466082 | Vera
+ Ballard                   |  9330646 | Carol
+ Belltown                  |  4160438 | Evan
+ Belltown                  |  8534462 | Daniela
+ Belltown                  | 31668017 | Andrew
+ Bitter Lake               | 19660299 | Daniel And Teresa
+ Brighton                  |  2536735 | Akiko And Matt
+ Broadview                 |  2907322 | Archana
+ Broadway                  |  4729705 | Rob And Carol
+ Bryant                    |  2409388 | Lisa
+ Capitol Hill              |    31509 | David
+ Capitol Hill              |   595610 | Elena
+ Capitol Hill              |   658155 | Joe
+ Capitol Hill              |  7673693 | Shawn
+ Capitol Hill              |  9195336 | Scooter
+ Capitol Hill              | 13309620 | Craig
+
+
+csc343h-yangj295=> -- 3. How are the mainstream property types and non-mainstream property types associated with the listing's score? 
+csc343h-yangj295=> --We define the "mainstream property type" to be the property type that takes up at least 2% of all property types of the listings in Seattle. 
+csc343h-yangj295=> -- for the first table: report the average score, highest score, lowest score for each property type which is one of the main-stream property types. And rank the results in descending order by the average score.
+csc343h-yangj295=> -- the second table is for non-main-stream property types. 
+csc343h-yangj295=> 
+csc343h-yangj295=> CREATE TABLE PropertyType_to_Scores_principle(
+csc343h-yangj295(>  property_Type varchar(10000),
+csc343h-yangj295(>  avgscore float, 
+csc343h-yangj295(>  highest_score float, 
+csc343h-yangj295(>  lowest_score float
+csc343h-yangj295(> );
+CREATE TABLE
+csc343h-yangj295=> 
+csc343h-yangj295=> CREATE TABLE PropertyType_to_Scores_select(
+csc343h-yangj295(>  property_Type varchar(10000),
+csc343h-yangj295(>  avgscore float, 
+csc343h-yangj295(>  highest_score float, 
+csc343h-yangj295(>  lowest_score float
+csc343h-yangj295(> );
+CREATE TABLE
+csc343h-yangj295=> 
+csc343h-yangj295=> 
+csc343h-yangj295=> -- find the target property types
+csc343h-yangj295=> 
+csc343h-yangj295=> CREATE VIEW all_property_types AS
+csc343h-yangj295-> SELECT DISTINCT property_Type,  
+csc343h-yangj295-> COUNT(*) AS num_listings, 
+csc343h-yangj295-> (SELECT COUNT(*) FROM ListingInfo) AS tot_num_listings,
+csc343h-yangj295-> CASE
+csc343h-yangj295->  WHEN COUNT(*)::float / (SELECT COUNT(*) FROM ListingInfo) >= 0.02 THEN TRUE
+csc343h-yangj295->  ELSE FALSE
+csc343h-yangj295-> END AS is_main_stream,
+csc343h-yangj295-> COUNT(*)::float / (SELECT COUNT(*) FROM ListingInfo) AS property_percentage
+csc343h-yangj295-> FROM ListingInfo
+csc343h-yangj295-> GROUP BY property_Type
+csc343h-yangj295-> ORDER BY property_Type;
+CREATE VIEW
+csc343h-yangj295=> 
+csc343h-yangj295=> 
+csc343h-yangj295=> CREATE VIEW target_property_types_principle AS
+csc343h-yangj295-> SELECT property_Type, is_main_stream, property_percentage
+csc343h-yangj295-> FROM all_property_types
+csc343h-yangj295-> WHERE is_main_stream=true
+csc343h-yangj295-> ORDER BY property_Type;
+CREATE VIEW
+csc343h-yangj295=> 
+csc343h-yangj295=> 
+csc343h-yangj295=> CREATE VIEW target_property_types_select AS
+csc343h-yangj295-> SELECT property_Type, is_main_stream, property_percentage
+csc343h-yangj295-> FROM all_property_types
+csc343h-yangj295-> WHERE is_main_stream=false
+csc343h-yangj295-> ORDER BY property_Type;
+CREATE VIEW
+csc343h-yangj295=> 
+csc343h-yangj295=> 
+csc343h-yangj295=> -- find scores corresponding to each property type for all property types
+csc343h-yangj295=> 
+csc343h-yangj295=> CREATE VIEW all_property_Type_scores AS
+csc343h-yangj295-> SELECT DISTINCT property_Type,
+csc343h-yangj295-> SUM(review_scores_rating)::float / COUNT(*)::float AS avgscore,
+csc343h-yangj295-> MAX(review_scores_rating) AS highest_score,
+csc343h-yangj295-> MIN(review_scores_rating) AS lowest_score
+csc343h-yangj295-> FROM Score s
+csc343h-yangj295-> JOIN ListingInfo ls USING (listing_id)
+csc343h-yangj295-> GROUP BY property_Type
+csc343h-yangj295-> ORDER BY avgscore DESC;
+CREATE VIEW
+csc343h-yangj295=> 
+csc343h-yangj295=> 
+csc343h-yangj295=> 
+csc343h-yangj295=> -- Obtain the result and insert into the table
+csc343h-yangj295=> 
+csc343h-yangj295=> INSERT INTO PropertyType_to_Scores_principle
+csc343h-yangj295-> SELECT property_Type, avgscore, highest_score, lowest_score
+csc343h-yangj295-> FROM all_property_Type_scores 
+csc343h-yangj295-> RIGHT JOIN target_property_types_principle USING (property_Type)
+csc343h-yangj295-> ORDER BY avgscore DESC;
+INSERT 0 4
+csc343h-yangj295=> 
+csc343h-yangj295=> 
+csc343h-yangj295=> INSERT INTO PropertyType_to_Scores_select
+csc343h-yangj295-> SELECT property_Type, avgscore, highest_score, lowest_score
+csc343h-yangj295-> FROM all_property_Type_scores 
+csc343h-yangj295-> RIGHT JOIN target_property_types_select USING (property_Type)
+csc343h-yangj295-> ORDER BY avgscore DESC;
+INSERT 0 13
+csc343h-yangj295=> 
+csc343h-yangj295=> select * from PropertyType_to_Scores_principle;
+ property_type |     avgscore     | highest_score | lowest_score 
+---------------+------------------+---------------+--------------
+ Townhouse     |           96.625 |           100 |           80
+ Condominium   | 95.3188405797101 |           100 |           80
+ House         | 94.8335616438356 |           100 |           40
+ Apartment     | 93.9775910364146 |           100 |           20
+(4 rows)
+
+csc343h-yangj295=> select * from PropertyType_to_Scores_select;
+  property_type  |     avgscore     | highest_score | lowest_score 
+-----------------+------------------+---------------+--------------
+                 |                  |               |             
+ Yurt            |              100 |           100 |          100
+ Bungalow        | 97.6666666666667 |           100 |           94
+ Other           | 96.2631578947368 |           100 |           90
+ Cabin           | 96.2380952380952 |           100 |           84
+ Treehouse       |               96 |           100 |           92
+ Bed & Breakfast | 95.7307692307692 |           100 |           85
+ Camper/RV       |             95.7 |           100 |           90
+ Boat            |             95.6 |           100 |           90
+ Loft            | 95.4545454545455 |           100 |           86
+ Tent            |             94.5 |           100 |           90
+ Dorm            |               90 |            93 |           87
+ Chalet          |             83.5 |            96 |           71
+(13 rows)
